@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<!--
+
+# References
+
+Modified ts-loader + vue-loader
+- https://github.com/alex-salnikov/ts-browser       - modified to process preloaded code
+- https://github.com/alex-salnikov/http-vue-loader  - modified to provide template's URL in langProcessor
+
+Further references
+- https://github.com/kafkadev/vue-without-webpack/blob/master/docs/index.html
+- https://www.w3schools.com/howto/howto_js_mobile_navbar.asp
+
+Attribution
+- icons: thenounproject.com
+
+-->
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Menu</title>
+    <link rel="icon" href="https://static.thenounproject.com/png/5320727-200.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css"
+        integrity="sha512-5A8nwdMOWrSz20fDsjczgUidUBR8liPYU+WymTZP1lmY9G6Oc7HlZv156XqnsgNUzTyMefFTcsFH/tnJE/+xBg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- vue, vue-router -->
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.3.3/vue.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/vue-router/2.5.3/vue-router.min.js'></script>
+
+    <!-- http-vue-loader -->
+    <script src="https://cdn.jsdelivr.net/gh/alex-salnikov/http-vue-loader@a192d02/src/httpVueLoader.js"></script>
+
+    <!-- ts-browser -->
+    <script type="importmap">
+		{
+			"imports": {
+				"ts-browser/": "https://cdn.jsdelivr.net/gh/alex-salnikov/ts-browser@ea76f66/src/"
+			}
+		}
+	</script>
+</head>
+<body>
+    <div id="app">
+
+        <!-- Top Navigation Menu -->
+        <div class="topnav">
+            <a href="#home" class="active">Logo</a>
+            <div id="myLinks">
+                <router-link :to="{ name: 'home' }">Home</router-link>
+                <router-link :to="{ name: 'page1' }">Page1</router-link>
+            </div>
+            <a href="javascript:void(0);" class="icon" @click="menuToggle()">
+                <i class="fa fa-bars"></i>
+            </a>
+        </div>
+
+        <div style="padding-left:16px">
+            <router-view></router-view>
+        </div>
+    </div>
+
+    <script type="module">
+        import {loadModule} from 'ts-browser/ts-browser.js';	// library base-path specified via importmap
+
+        // ts-loader
+        httpVueLoader.langProcessor.ts = function(code, url) {
+            console.log(`called langProcessor.ts for ${url}`)
+
+            return loadModule(url, {}, code).then(module => {
+                console.log(`processed module ${url}`)
+            });
+        }
+
+        // index.ts
+        loadModule('./index.ts').then(module => {
+            console.log('start module')
+            return module.default('#app')
+        });
+    </script>
+</body>
+</html>
